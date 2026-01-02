@@ -3,10 +3,10 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Login from "./pages/Login";
+import BudgetSetup from "./pages/BudgetSetup";
+import BillUpload from "./pages/BillUpload";
+import Appliances from "./pages/Appliances";
 import Dashboard from "./pages/Dashboard";
-import ConsumptionTracker from "./pages/ConsumptionTracker";
-import Reports from "./pages/Reports";
 import Alerts from "./pages/Alerts";
 import NotFound from "./pages/NotFound";
 
@@ -19,11 +19,11 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<Navigate to="/budget-setup" replace />} />
+          <Route path="/budget-setup" element={<BudgetSetup />} />
+          <Route path="/bill-upload" element={<BillUpload />} />
+          <Route path="/appliances" element={<Appliances />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/consumption" element={<ConsumptionTracker />} />
-          <Route path="/reports" element={<Reports />} />
           <Route path="/alerts" element={<Alerts />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

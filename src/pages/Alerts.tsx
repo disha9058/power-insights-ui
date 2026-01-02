@@ -1,6 +1,6 @@
-import { AlertTriangle, Info, AlertCircle, Bell, Trash2 } from "lucide-react";
+import { AlertTriangle, AlertCircle, Info, Bell } from "lucide-react";
 import BottomNavigation from "@/components/BottomNavigation";
-import { alerts } from "@/data/dummyData";
+import { budgetAlerts } from "@/data/dummyData";
 
 const getAlertIcon = (type: string) => {
   switch (type) {
@@ -33,8 +33,8 @@ const Alerts = () => {
       <div className="page-header">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="page-title">Alerts</h1>
-            <p className="page-subtitle">Stay informed about your energy usage</p>
+            <h1 className="page-title">Budget Alerts</h1>
+            <p className="page-subtitle">Stay on top of your electricity spending</p>
           </div>
           <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
             <Bell className="w-5 h-5 text-primary" />
@@ -46,30 +46,30 @@ const Alerts = () => {
         {/* Alert Stats */}
         <div className="flex gap-3">
           <div className="flex-1 stat-card text-center py-4">
-            <p className="text-2xl font-bold text-warning">{alerts.filter(a => a.type === "warning").length}</p>
+            <p className="text-2xl font-bold text-warning">
+              {budgetAlerts.filter(a => a.type === "warning").length}
+            </p>
             <p className="text-xs text-muted-foreground">Warnings</p>
           </div>
           <div className="flex-1 stat-card text-center py-4">
-            <p className="text-2xl font-bold text-destructive">{alerts.filter(a => a.type === "danger").length}</p>
+            <p className="text-2xl font-bold text-destructive">
+              {budgetAlerts.filter(a => a.type === "danger").length}
+            </p>
             <p className="text-xs text-muted-foreground">Critical</p>
           </div>
           <div className="flex-1 stat-card text-center py-4">
-            <p className="text-2xl font-bold text-info">{alerts.filter(a => a.type === "info").length}</p>
-            <p className="text-xs text-muted-foreground">Info</p>
+            <p className="text-2xl font-bold text-info">
+              {budgetAlerts.filter(a => a.type === "info").length}
+            </p>
+            <p className="text-xs text-muted-foreground">Tips</p>
           </div>
         </div>
 
         {/* Alerts List */}
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="section-title mb-0">Recent Alerts</h3>
-            <button className="text-sm text-muted-foreground flex items-center gap-1">
-              <Trash2 className="w-4 h-4" />
-              Clear all
-            </button>
-          </div>
+          <h3 className="section-title mb-0">Recent Alerts</h3>
 
-          {alerts.map((alert) => (
+          {budgetAlerts.map((alert) => (
             <div key={alert.id} className={`alert-card ${getAlertStyle(alert.type)}`}>
               <div className="flex gap-3">
                 <div className="flex-shrink-0 mt-0.5">
@@ -87,23 +87,11 @@ const Alerts = () => {
           ))}
         </div>
 
-        {/* Alert Settings Info */}
-        <div className="stat-card">
-          <h3 className="section-title">Alert Settings</h3>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">High usage threshold</span>
-              <span className="text-sm font-medium">2.0 kW</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Peak hour alerts</span>
-              <span className="text-sm font-medium text-success">Enabled</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Monthly report</span>
-              <span className="text-sm font-medium text-success">Enabled</span>
-            </div>
-          </div>
+        {/* Info */}
+        <div className="text-center py-6">
+          <p className="text-sm text-muted-foreground">
+            Alerts are generated based on your budget and spending patterns
+          </p>
         </div>
       </div>
 

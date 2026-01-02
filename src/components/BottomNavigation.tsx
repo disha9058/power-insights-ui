@@ -1,10 +1,8 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Activity, FileText, Bell } from "lucide-react";
+import { LayoutDashboard, Bell } from "lucide-react";
 
 const navItems = [
   { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { path: "/consumption", label: "Tracker", icon: Activity },
-  { path: "/reports", label: "Reports", icon: FileText },
   { path: "/alerts", label: "Alerts", icon: Bell },
 ];
 
