@@ -143,14 +143,14 @@ const Dashboard = () => {
         {/* Appliance Control */}
         <div className="stat-card">
           <h3 className="section-title">Appliance Control</h3>
-          <div className="flex items-center justify-between py-3">
-            <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${bulbOn ? "bg-success/20" : "bg-muted"}`}>
-                <Lightbulb className={`w-5 h-5 transition-colors ${bulbOn ? "text-success" : "text-muted-foreground"}`} />
+          <div className="flex items-center justify-between py-4">
+            <div className="flex items-center gap-4">
+              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${bulbOn ? "bg-success/20" : "bg-muted"}`}>
+                <Lightbulb className={`w-7 h-7 transition-colors ${bulbOn ? "text-success" : "text-muted-foreground"}`} />
               </div>
               <div>
-                <p className="font-medium text-foreground">Bulb Power</p>
-                <p className={`text-xs font-medium ${bulbOn ? "text-success" : "text-muted-foreground"}`}>
+                <p className="text-lg font-semibold text-foreground">Bulb Power</p>
+                <p className={`text-sm font-medium ${bulbOn ? "text-success" : "text-muted-foreground"}`}>
                   Bulb is {bulbOn ? "ON" : "OFF"}
                 </p>
               </div>
@@ -159,7 +159,7 @@ const Dashboard = () => {
               checked={bulbOn}
               onCheckedChange={handleBulbToggle}
               disabled={isLoading}
-              className="data-[state=checked]:bg-success"
+              className="h-8 w-14 data-[state=checked]:bg-success [&>span]:h-7 [&>span]:w-7 [&>span]:data-[state=checked]:translate-x-6"
             />
           </div>
         </div>
