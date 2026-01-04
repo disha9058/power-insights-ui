@@ -1,10 +1,32 @@
-import { IndianRupee, TrendingUp, Calendar, Zap } from "lucide-react";
+import { useState } from "react";
+import { IndianRupee, TrendingUp, Calendar, Zap, Lightbulb } from "lucide-react";
 import BottomNavigation from "@/components/BottomNavigation";
 import { Progress } from "@/components/ui/progress";
+import { Switch } from "@/components/ui/switch";
 import { budgetData, dailySpending } from "@/data/dummyData";
 
+const RASPBERRY_PI_IP = "RASPBERRY_PI_IP"; // Replace with actual IP
+
 const Dashboard = () => {
+  const [bulbOn, setBulbOn] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const isOverBudget = budgetData.estimatedEndOfMonth > budgetData.monthlyBudget;
+
+  const handleBulbToggle = async (checked: boolean) => {
+    setIsLoading(true);
+    const endpoint = checked ? "on" : "off";
+    
+    try {
+      await fetch(`http://${RASPBERRY_PI_IP}:5000/api/led/${endpoint}`, {
+        method: "POST",
+      });
+      setBulbOn(checked);
+    } catch (error) {
+      console.error("Failed to toggle bulb:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="page-container">
@@ -115,6 +137,30 @@ const Dashboard = () => {
                 <span className="font-bold text-foreground">₹{day.cost}</span>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Appliance Control */}
+        <div className="stat-card">
+          <h3 className="section-title">Appliance Control</h3>
+          <div className="flex items-center justify-between py-3">
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${bulbOn ? "bg-success/20" : "bg-muted"}`}>
+                <Lightbulb className={`w-5 h-5 transition-colors ${bulbOn ? "text-success" : "text-muted-foreground"}`} />
+              </div>
+              <div>
+                <p className="font-medium text-foreground">Bulb Power</p>
+                <p className={`text-xs font-medium ${bulbOn ? "text-success" : "text-muted-foreground"}`}>
+                  Bulb is {bulbOn ? "ON" : "OFF"}
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={bulbOn}
+              onCheckedChange={handleBulbToggle}
+              disabled={isLoading}
+              className="data-[state=checked]:bg-success"
+            />
           </div>
         </div>
       </div>
