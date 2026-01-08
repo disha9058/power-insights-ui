@@ -182,55 +182,47 @@
   }
 }
 
-/* Custom Toggle Switch */
-.custom-switch {
-  margin: 0;
-  position: relative;
-  display: inline-block;
-  width: 60px;
-  height: 34px;
+/* GPIO Toggle Button */
+.gpio-toggle {
+  display: flex;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid hsl(var(--border));
 }
 
-.custom-switch input {
-  display: none;
-}
-
-.custom-slider {
-  position: absolute;
+.gpio-toggle-btn {
+  padding: 12px 24px;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: lowercase;
+  border: none;
   cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  display: block;
+  transition: all 200ms ease;
+  min-width: 70px;
+}
+
+.gpio-toggle-btn.on {
   background-color: hsl(var(--muted));
-  transition: all 300ms ease;
-  border-radius: 34px;
+  color: hsl(var(--muted-foreground));
 }
 
-.custom-slider:before {
-  position: absolute;
-  content: "";
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 4px;
-  background-color: hsl(var(--background));
-  transition: all 300ms ease;
-  border-radius: 100%;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.custom-switch input:checked + .custom-slider {
+.gpio-toggle-btn.on.active {
   background-color: hsl(var(--success));
+  color: hsl(var(--success-foreground));
 }
 
-.custom-switch input:checked + .custom-slider:before {
-  transform: translateX(26px);
+.gpio-toggle-btn.off {
+  background-color: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
 }
 
-.custom-switch input:disabled + .custom-slider {
+.gpio-toggle-btn.off.active {
+  background-color: hsl(var(--muted));
+  color: hsl(var(--foreground));
+}
+
+.gpio-toggle-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
