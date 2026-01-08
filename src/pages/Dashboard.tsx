@@ -4,7 +4,8 @@ import BottomNavigation from "@/components/BottomNavigation";
 import { Progress } from "@/components/ui/progress";
 import { budgetData, dailySpending } from "@/data/dummyData";
 
-const RASPBERRY_PI_IP = "RASPBERRY_PI_IP"; // Replace with actual IP
+const RASPBERRY_PI_IP = "RASPBERRY_PI_IP"; // Replace with your Pi's IP address
+const BULB_GPIO_PIN = 17; // Replace with your GPIO pin number
 
 const Dashboard = () => {
   const [bulbOn, setBulbOn] = useState(false);
@@ -13,13 +14,14 @@ const Dashboard = () => {
 
   const handleBulbToggle = async (checked: boolean) => {
     setIsLoading(true);
-    const endpoint = checked ? "on" : "off";
+    const state = checked ? 1 : 0;
     
     try {
-      await fetch(`http://${RASPBERRY_PI_IP}:5000/api/led/${endpoint}`, {
-        method: "POST",
-      });
-      setBulbOn(checked);
+      const response = await fetch(
+        `http://${RASPBERRY_PI_IP}/gpio-control.php?gpio=${BULB_GPIO_PIN}&state=${state}`
+      );
+      const data = await response.json();
+      setBulbOn(data.state === "1" || data.state === 1);
     } catch (error) {
       console.error("Failed to toggle bulb:", error);
     } finally {
