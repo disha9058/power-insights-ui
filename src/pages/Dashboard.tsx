@@ -2,7 +2,6 @@ import { useState } from "react";
 import { IndianRupee, TrendingUp, Calendar, Zap, Lightbulb } from "lucide-react";
 import BottomNavigation from "@/components/BottomNavigation";
 import { Progress } from "@/components/ui/progress";
-import { Switch } from "@/components/ui/switch";
 import { budgetData, dailySpending } from "@/data/dummyData";
 
 const RASPBERRY_PI_IP = "RASPBERRY_PI_IP"; // Replace with actual IP
@@ -155,12 +154,15 @@ const Dashboard = () => {
                 </p>
               </div>
             </div>
-            <Switch
-              checked={bulbOn}
-              onCheckedChange={handleBulbToggle}
-              disabled={isLoading}
-              className="h-8 w-14 data-[state=checked]:bg-success [&>span]:h-7 [&>span]:w-7 [&>span]:data-[state=checked]:translate-x-6"
-            />
+            <label className="custom-switch">
+              <input
+                type="checkbox"
+                checked={bulbOn}
+                onChange={(e) => handleBulbToggle(e.target.checked)}
+                disabled={isLoading}
+              />
+              <span className="custom-slider"></span>
+            </label>
           </div>
         </div>
       </div>
