@@ -156,15 +156,22 @@ const Dashboard = () => {
                 </p>
               </div>
             </div>
-            <label className="custom-switch">
-              <input
-                type="checkbox"
-                checked={bulbOn}
-                onChange={(e) => handleBulbToggle(e.target.checked)}
+            <div className="gpio-toggle">
+              <button
+                className={`gpio-toggle-btn on ${bulbOn ? 'active' : ''}`}
+                onClick={() => !bulbOn && handleBulbToggle(true)}
                 disabled={isLoading}
-              />
-              <span className="custom-slider"></span>
-            </label>
+              >
+                on
+              </button>
+              <button
+                className={`gpio-toggle-btn off ${!bulbOn ? 'active' : ''}`}
+                onClick={() => bulbOn && handleBulbToggle(false)}
+                disabled={isLoading}
+              >
+                off
+              </button>
+            </div>
           </div>
         </div>
       </div>
