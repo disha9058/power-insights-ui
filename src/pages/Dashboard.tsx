@@ -1,39 +1,64 @@
-import { useState } from "react";
-import { IndianRupee, TrendingUp, Calendar, Zap, Lightbulb } from "lucide-react";
+import { IndianRupee, TrendingUp, Calendar, Zap, Lightbulb, Loader2 } from "lucide-react";
 import BottomNavigation from "@/components/BottomNavigation";
 import { Progress } from "@/components/ui/progress";
-import { budgetData, dailySpending } from "@/data/dummyData";
-
-const RASPBERRY_PI_IP = "RASPBERRY_PI_IP"; // Replace with your Pi's IP address
-const BULB_GPIO_PIN = 17; // Replace with your GPIO pin number
+import { useBudgetData } from "@/hooks/useBudgetData";
+import { useTotalMonthlyStats, useTotalDailyStats } from "@/hooks/useUsageData";
+import { useAppliances, useApplianceStates, useToggleAppliance } from "@/hooks/useAppliances";
+import ApplianceControlCard from "@/components/ApplianceControlCard";
+import DailyUsageList from "@/components/DailyUsageList";
 
 const Dashboard = () => {
-  const [bulbOn, setBulbOn] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const isOverBudget = budgetData.estimatedEndOfMonth > budgetData.monthlyBudget;
+  const { data: budgetStatus, isLoading: budgetLoading } = useBudgetData();
+  const { totals: monthlyTotals, isLoading: monthlyLoading } = useTotalMonthlyStats();
+  const { totals: dailyTotals } = useTotalDailyStats();
+  const { data: appliances, isLoading: appliancesLoading } = useAppliances();
+  const { data: applianceStates } = useApplianceStates();
+  const toggleAppliance = useToggleAppliance();
 
-  const handleBulbToggle = async (checked: boolean) => {
-    setIsLoading(true);
-    const state = checked ? 1 : 0;
-    
-    try {
-      const response = await fetch(
-        `http://${RASPBERRY_PI_IP}/gpio-control.php?gpio=${BULB_GPIO_PIN}&state=${state}`
-      );
-      const data = await response.json();
-      setBulbOn(data.state === "1" || data.state === 1);
-    } catch (error) {
-      console.error("Failed to toggle bulb:", error);
-    } finally {
-      setIsLoading(false);
+  const now = new Date();
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const daysRemaining = daysInMonth - now.getDate();
+  const daysPassed = now.getDate();
+
+  const monthSpent = budgetStatus?.month_spent || 0;
+  const monthlyBudget = budgetStatus?.monthly_budget || 3000;
+  const percentUsed = monthlyBudget > 0 ? Math.round((monthSpent / monthlyBudget) * 100) : 0;
+  const remainingBudget = monthlyBudget - monthSpent;
+
+  // Estimate end of month based on current spending rate
+  const dailyAverage = daysPassed > 0 ? monthSpent / daysPassed : 0;
+  const estimatedEndOfMonth = Math.round(dailyAverage * daysInMonth);
+  const isOverBudget = estimatedEndOfMonth > monthlyBudget;
+
+  // Calculate current power (sum of ON appliances power ratings)
+  const currentPower = appliances?.reduce((acc, appliance) => {
+    const state = applianceStates?.[appliance.id];
+    if (state?.state === "on") {
+      return acc + Number(appliance.power_rating) / 1000; // Convert W to kW
     }
+    return acc;
+  }, 0) || 0;
+
+  const handleToggle = (applianceId: string, currentState: string) => {
+    const newState = currentState === "on" ? "off" : "on";
+    toggleAppliance.mutate({ applianceId, state: newState });
   };
+
+  if (budgetLoading || monthlyLoading || appliancesLoading) {
+    return (
+      <div className="page-container flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const monthName = now.toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
   return (
     <div className="page-container">
       {/* Header */}
       <div className="page-header">
-        <p className="text-sm text-muted-foreground">January 2026</p>
+        <p className="text-sm text-muted-foreground">{monthName}</p>
         <h1 className="page-title">Budget Overview</h1>
       </div>
 
@@ -46,15 +71,15 @@ const Dashboard = () => {
           <div className="flex items-baseline gap-1 mb-4">
             <IndianRupee className="w-8 h-8" />
             <span className="text-5xl font-bold">
-              {budgetData.amountSpent.toLocaleString()}
+              {Math.round(monthSpent).toLocaleString()}
             </span>
           </div>
           <div className="flex items-center justify-between text-sm">
             <span className="text-primary-foreground/70">
-              of ₹{budgetData.monthlyBudget.toLocaleString()} budget
+              of ₹{monthlyBudget.toLocaleString()} budget
             </span>
             <span className="font-semibold">
-              {budgetData.percentUsed}% used
+              {percentUsed}% used
             </span>
           </div>
         </div>
@@ -64,16 +89,16 @@ const Dashboard = () => {
           <div className="flex justify-between items-center mb-3">
             <span className="font-semibold text-foreground">Monthly Budget</span>
             <span className="text-sm text-muted-foreground">
-              {budgetData.daysRemaining} days left
+              {daysRemaining} days left
             </span>
           </div>
-          <Progress value={budgetData.percentUsed} className="h-3 mb-3" />
+          <Progress value={Math.min(percentUsed, 100)} className="h-3 mb-3" />
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">
-              ₹{budgetData.amountSpent.toLocaleString()} spent
+              ₹{Math.round(monthSpent).toLocaleString()} spent
             </span>
             <span className="font-semibold text-primary">
-              ₹{budgetData.remainingBudget.toLocaleString()} remaining
+              ₹{Math.round(remainingBudget).toLocaleString()} remaining
             </span>
           </div>
         </div>
@@ -87,13 +112,13 @@ const Dashboard = () => {
             <div className="flex-1">
               <p className="text-sm text-muted-foreground">Estimated End of Month</p>
               <p className="text-2xl font-bold text-foreground">
-                ₹{budgetData.estimatedEndOfMonth.toLocaleString()}
+                ₹{estimatedEndOfMonth.toLocaleString()}
               </p>
             </div>
           </div>
           {isOverBudget && (
             <p className="text-sm text-destructive mt-3 font-medium">
-              ⚠️ You may exceed budget by ₹{(budgetData.estimatedEndOfMonth - budgetData.monthlyBudget).toLocaleString()}
+              ⚠️ You may exceed budget by ₹{(estimatedEndOfMonth - monthlyBudget).toLocaleString()}
             </p>
           )}
         </div>
@@ -106,7 +131,7 @@ const Dashboard = () => {
               <span className="text-xs text-muted-foreground">Current Power</span>
             </div>
             <p className="text-xl font-bold text-foreground">
-              {budgetData.currentPower} <span className="text-sm font-normal text-muted-foreground">kW</span>
+              {currentPower.toFixed(2)} <span className="text-sm font-normal text-muted-foreground">kW</span>
             </p>
           </div>
           <div className="stat-card">
@@ -115,65 +140,55 @@ const Dashboard = () => {
               <span className="text-xs text-muted-foreground">This Month</span>
             </div>
             <p className="text-xl font-bold text-foreground">
-              {budgetData.totalConsumption} <span className="text-sm font-normal text-muted-foreground">kWh</span>
+              {monthlyTotals.energy_kwh.toFixed(2)} <span className="text-sm font-normal text-muted-foreground">kWh</span>
             </p>
           </div>
         </div>
 
-        {/* Recent Spending */}
+        {/* Today's Stats */}
         <div className="stat-card">
-          <h3 className="section-title">Recent Daily Spending</h3>
-          <div className="space-y-3">
-            {dailySpending.slice(0, 5).map((day, index) => (
-              <div
-                key={index}
-                className="flex justify-between items-center py-2 border-b border-border last:border-0"
-              >
-                <div>
-                  <span className="font-medium text-foreground">{day.date}</span>
-                  <span className="text-xs text-muted-foreground ml-2">
-                    {day.units} kWh
-                  </span>
-                </div>
-                <span className="font-bold text-foreground">₹{day.cost}</span>
-              </div>
-            ))}
+          <h3 className="section-title">Today's Usage</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-muted-foreground">Energy Used</p>
+              <p className="text-lg font-bold text-foreground">{dailyTotals.energy_kwh.toFixed(2)} kWh</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Cost</p>
+              <p className="text-lg font-bold text-foreground">₹{dailyTotals.cost.toFixed(2)}</p>
+            </div>
+          </div>
+          <div className="mt-3 pt-3 border-t border-border">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">Daily Budget</span>
+              <span className={`font-semibold ${budgetStatus?.daily_overrun ? "text-destructive" : "text-success"}`}>
+                ₹{Math.round(budgetStatus?.daily_remaining || 0)} remaining
+              </span>
+            </div>
           </div>
         </div>
 
         {/* Appliance Control */}
         <div className="stat-card">
           <h3 className="section-title">Appliance Control</h3>
-          <div className="flex items-center justify-between py-4">
-            <div className="flex items-center gap-4">
-              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${bulbOn ? "bg-success/20" : "bg-muted"}`}>
-                <Lightbulb className={`w-7 h-7 transition-colors ${bulbOn ? "text-success" : "text-muted-foreground"}`} />
-              </div>
-              <div>
-                <p className="text-lg font-semibold text-foreground">Bulb Power</p>
-                <p className={`text-sm font-medium ${bulbOn ? "text-success" : "text-muted-foreground"}`}>
-                  Bulb is {bulbOn ? "ON" : "OFF"}
-                </p>
-              </div>
-            </div>
-            <div className="gpio-toggle">
-              <button
-                className={`gpio-toggle-btn on ${bulbOn ? 'active' : ''}`}
-                onClick={() => !bulbOn && handleBulbToggle(true)}
-                disabled={isLoading}
-              >
-                on
-              </button>
-              <button
-                className={`gpio-toggle-btn off ${!bulbOn ? 'active' : ''}`}
-                onClick={() => bulbOn && handleBulbToggle(false)}
-                disabled={isLoading}
-              >
-                off
-              </button>
-            </div>
+          <div className="space-y-3">
+            {appliances?.slice(0, 4).map((appliance) => {
+              const currentState = applianceStates?.[appliance.id]?.state || "off";
+              return (
+                <ApplianceControlCard
+                  key={appliance.id}
+                  appliance={appliance}
+                  currentState={currentState}
+                  onToggle={() => handleToggle(appliance.id, currentState)}
+                  isLoading={toggleAppliance.isPending}
+                />
+              );
+            })}
           </div>
         </div>
+
+        {/* Daily Usage List */}
+        <DailyUsageList />
       </div>
 
       <BottomNavigation />
