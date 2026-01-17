@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Home, Check } from "lucide-react";
-import { appliancesList } from "@/data/dummyData";
+import { Home, Check, Loader2 } from "lucide-react";
+import { useAppliances } from "@/hooks/useAppliances";
 
 const Appliances = () => {
-  const [selectedAppliances, setSelectedAppliances] = useState<number[]>([]);
+  const [selectedAppliances, setSelectedAppliances] = useState<string[]>([]);
   const [applianceCount, setApplianceCount] = useState("");
   const navigate = useNavigate();
+  const { data: appliances, isLoading } = useAppliances();
 
-  const toggleAppliance = (id: number) => {
+  const toggleAppliance = (id: string) => {
     setSelectedAppliances((prev) =>
       prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]
     );
@@ -17,6 +18,14 @@ const Appliances = () => {
   const handleContinue = () => {
     navigate("/dashboard");
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -53,13 +62,13 @@ const Appliances = () => {
         </div>
 
         {/* Appliance Checklist */}
-        <h3 className="section-title">Common Appliances</h3>
+        <h3 className="section-title">Your Appliances</h3>
         <p className="text-sm text-muted-foreground mb-4">
           Select the ones you use regularly
         </p>
 
         <div className="grid grid-cols-2 gap-3">
-          {appliancesList.map((appliance) => {
+          {appliances?.map((appliance) => {
             const isSelected = selectedAppliances.includes(appliance.id);
             return (
               <button
@@ -72,7 +81,7 @@ const Appliances = () => {
                 }`}
               >
                 <div className="flex items-start justify-between mb-2">
-                  <span className="text-2xl">{appliance.icon}</span>
+                  <span className="text-2xl">{appliance.icon || "💡"}</span>
                   {isSelected && (
                     <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center">
                       <Check className="w-3 h-3 text-primary-foreground" />
@@ -83,7 +92,7 @@ const Appliances = () => {
                   {appliance.name}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  ~{appliance.typical}W
+                  ~{appliance.power_rating}W
                 </p>
               </button>
             );
