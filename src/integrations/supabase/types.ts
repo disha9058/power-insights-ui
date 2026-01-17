@@ -14,13 +14,181 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      appliance_states: {
+        Row: {
+          appliance_id: string
+          id: string
+          state: string
+          timestamp: string
+        }
+        Insert: {
+          appliance_id: string
+          id?: string
+          state: string
+          timestamp?: string
+        }
+        Update: {
+          appliance_id?: string
+          id?: string
+          state?: string
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appliance_states_appliance_id_fkey"
+            columns: ["appliance_id"]
+            isOneToOne: false
+            referencedRelation: "appliances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appliances: {
+        Row: {
+          created_at: string
+          gpio_pin: number | null
+          icon: string | null
+          id: string
+          name: string
+          power_rating: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          gpio_pin?: number | null
+          icon?: string | null
+          id?: string
+          name: string
+          power_rating?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          gpio_pin?: number | null
+          icon?: string | null
+          id?: string
+          name?: string
+          power_rating?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      budget_settings: {
+        Row: {
+          cost_per_unit: number
+          created_at: string
+          daily_budget: number
+          id: string
+          monthly_budget: number
+          updated_at: string
+        }
+        Insert: {
+          cost_per_unit?: number
+          created_at?: string
+          daily_budget?: number
+          id?: string
+          monthly_budget?: number
+          updated_at?: string
+        }
+        Update: {
+          cost_per_unit?: number
+          created_at?: string
+          daily_budget?: number
+          id?: string
+          monthly_budget?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      daily_usage_summary: {
+        Row: {
+          appliance_id: string
+          cost: number
+          created_at: string
+          date: string
+          energy_kwh: number
+          id: string
+          total_on_time_minutes: number
+        }
+        Insert: {
+          appliance_id: string
+          cost?: number
+          created_at?: string
+          date?: string
+          energy_kwh?: number
+          id?: string
+          total_on_time_minutes?: number
+        }
+        Update: {
+          appliance_id?: string
+          cost?: number
+          created_at?: string
+          date?: string
+          energy_kwh?: number
+          id?: string
+          total_on_time_minutes?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_usage_summary_appliance_id_fkey"
+            columns: ["appliance_id"]
+            isOneToOne: false
+            referencedRelation: "appliances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calculate_appliance_on_time: {
+        Args: {
+          p_appliance_id: string
+          p_end_date: string
+          p_start_date: string
+        }
+        Returns: number
+      }
+      get_budget_status: {
+        Args: never
+        Returns: {
+          cost_per_unit: number
+          daily_budget: number
+          daily_overrun: boolean
+          daily_remaining: number
+          month_spent: number
+          monthly_budget: number
+          monthly_overrun: boolean
+          monthly_remaining: number
+          today_spent: number
+        }[]
+      }
+      get_daily_usage_summary: {
+        Args: { p_date?: string }
+        Returns: {
+          appliance_id: string
+          appliance_name: string
+          cost: number
+          energy_kwh: number
+          icon: string
+          power_rating: number
+          total_on_time_minutes: number
+        }[]
+      }
+      get_monthly_usage_summary: {
+        Args: { p_month: number; p_year: number }
+        Returns: {
+          appliance_id: string
+          appliance_name: string
+          cost: number
+          energy_kwh: number
+          icon: string
+          power_rating: number
+          total_on_time_minutes: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
