@@ -141,6 +141,38 @@ export type Database = {
           },
         ]
       }
+      user_appliance_selections: {
+        Row: {
+          appliance_id: string
+          created_at: string
+          id: string
+          quantity: number
+          updated_at: string
+        }
+        Insert: {
+          appliance_id: string
+          created_at?: string
+          id?: string
+          quantity?: number
+          updated_at?: string
+        }
+        Update: {
+          appliance_id?: string
+          created_at?: string
+          id?: string
+          quantity?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_appliance_selections_appliance_id_fkey"
+            columns: ["appliance_id"]
+            isOneToOne: true
+            referencedRelation: "appliances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
