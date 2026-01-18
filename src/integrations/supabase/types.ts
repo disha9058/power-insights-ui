@@ -80,6 +80,7 @@ export type Database = {
           daily_budget: number
           id: string
           monthly_budget: number
+          total_appliances_count: number | null
           updated_at: string
         }
         Insert: {
@@ -88,6 +89,7 @@ export type Database = {
           daily_budget?: number
           id?: string
           monthly_budget?: number
+          total_appliances_count?: number | null
           updated_at?: string
         }
         Update: {
@@ -96,6 +98,7 @@ export type Database = {
           daily_budget?: number
           id?: string
           monthly_budget?: number
+          total_appliances_count?: number | null
           updated_at?: string
         }
         Relationships: []

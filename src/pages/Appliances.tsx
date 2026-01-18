@@ -1,11 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Home, Check, Loader2 } from "lucide-react";
+import { Home, Check, Loader2, AlertCircle } from "lucide-react";
 import { useAppliances } from "@/hooks/useAppliances";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Appliances = () => {
   const [selectedAppliances, setSelectedAppliances] = useState<string[]>([]);
   const [applianceCount, setApplianceCount] = useState("");
+  const [error, setError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
   const navigate = useNavigate();
   const { data: appliances, isLoading } = useAppliances();
 
@@ -15,8 +19,57 @@ const Appliances = () => {
     );
   };
 
-  const handleContinue = () => {
-    navigate("/dashboard");
+  const validateApplianceCount = (value: string): boolean => {
+    if (!value.trim()) {
+      setError("Please enter the number of appliances");
+      return false;
+    }
+    const num = parseInt(value, 10);
+    if (isNaN(num) || num <= 0) {
+      setError("Please enter a valid positive number");
+      return false;
+    }
+    if (num > 500) {
+      setError("Please enter a realistic number (max 500)");
+      return false;
+    }
+    setError("");
+    return true;
+  };
+
+  const handleCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Only allow positive integers
+    if (value === "" || /^[1-9][0-9]*$/.test(value)) {
+      setApplianceCount(value);
+      if (value) validateApplianceCount(value);
+      else setError("");
+    }
+  };
+
+  const handleContinue = async () => {
+    if (!validateApplianceCount(applianceCount)) {
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      // Update budget_settings with total_appliances_count
+      const { error: updateError } = await supabase
+        .from("budget_settings")
+        .update({ total_appliances_count: parseInt(applianceCount, 10) })
+        .eq("id", (await supabase.from("budget_settings").select("id").limit(1).single()).data?.id || "");
+
+      if (updateError) throw updateError;
+
+      toast.success("Settings saved successfully!");
+      navigate("/dashboard");
+    } catch (err) {
+      console.error("Error saving appliance count:", err);
+      toast.error("Failed to save settings. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (isLoading) {
@@ -26,6 +79,8 @@ const Appliances = () => {
       </div>
     );
   }
+
+  const isValid = applianceCount.trim() !== "" && !error;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -41,28 +96,46 @@ const Appliances = () => {
       </div>
 
       <div className="px-6 flex-1 overflow-auto pb-32">
-        {/* Appliance Count */}
-        <div className="stat-card mb-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-              <Home className="w-5 h-5 text-primary" />
+        {/* Total Appliances Count Section */}
+        <div className="bg-card rounded-2xl border border-border p-5 mb-6 shadow-sm">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Home className="w-6 h-6 text-primary" />
             </div>
-            <div>
-              <p className="font-semibold text-foreground">Total Appliances</p>
-              <p className="text-xs text-muted-foreground">Approximate number at home</p>
+            <div className="flex-1">
+              <label htmlFor="applianceCount" className="font-semibold text-foreground block mb-1">
+                Total Appliances at Home
+              </label>
+              <p className="text-xs text-muted-foreground mb-3">
+                Approximate number of electrical appliances in your home
+              </p>
+              <div className="relative">
+                <input
+                  id="applianceCount"
+                  type="text"
+                  inputMode="numeric"
+                  value={applianceCount}
+                  onChange={handleCountChange}
+                  placeholder="e.g. 15"
+                  className={`w-full px-4 py-3 rounded-xl border-2 bg-background text-foreground text-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 ${
+                    error 
+                      ? "border-destructive focus:border-destructive" 
+                      : "border-border focus:border-primary"
+                  }`}
+                />
+                {error && (
+                  <div className="flex items-center gap-1.5 mt-2 text-destructive">
+                    <AlertCircle className="w-4 h-4" />
+                    <span className="text-xs">{error}</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-          <input
-            type="number"
-            value={applianceCount}
-            onChange={(e) => setApplianceCount(e.target.value)}
-            placeholder="e.g., 15"
-            className="input-field text-center text-xl font-bold"
-          />
         </div>
 
         {/* Appliance Checklist */}
-        <h3 className="section-title">Your Appliances</h3>
+        <h3 className="text-base font-semibold text-foreground mb-1">Your Appliances</h3>
         <p className="text-sm text-muted-foreground mb-4">
           Select the ones you use regularly
         </p>
@@ -102,15 +175,33 @@ const Appliances = () => {
 
       {/* Continue Button */}
       <div className="fixed bottom-0 left-0 right-0 px-6 pb-8 pt-4 bg-gradient-to-t from-background via-background to-transparent">
+        {/* Summary before button */}
+        <div className="flex items-center justify-between text-sm mb-3 px-1">
+          <span className="text-muted-foreground">
+            Total appliances: <span className="font-semibold text-foreground">{applianceCount || "—"}</span>
+          </span>
+          <span className="text-muted-foreground">
+            Selected: <span className="font-semibold text-foreground">{selectedAppliances.length}</span>
+          </span>
+        </div>
         <button
           onClick={handleContinue}
-          className="btn-primary"
+          disabled={!isValid || isSaving}
+          className={`w-full py-4 rounded-xl font-semibold text-lg transition-all ${
+            isValid && !isSaving
+              ? "bg-primary text-primary-foreground hover:bg-primary/90"
+              : "bg-muted text-muted-foreground cursor-not-allowed"
+          }`}
         >
-          Start Tracking
+          {isSaving ? (
+            <span className="flex items-center justify-center gap-2">
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Saving...
+            </span>
+          ) : (
+            "Start Tracking"
+          )}
         </button>
-        <p className="text-center text-xs text-muted-foreground mt-3">
-          {selectedAppliances.length} appliances selected
-        </p>
       </div>
     </div>
   );
