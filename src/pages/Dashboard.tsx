@@ -64,10 +64,10 @@ const Dashboard = () => {
   const isOverBudget = estimatedEndOfMonth > monthlyBudget;
 
   // 🔌 Calculate live power from appliances
-  const currentPower = appliances?.reduce((acc, appliance) => {
+  const currentPower = controlAppliances?.reduce((acc, appliance) => {
     const state = applianceStates?.[appliance.id];
     if (state?.state === "on") {
-      return acc + Number(appliance.power_rating) / 1000; // W → kW
+      return acc + Number(appliance.power_rating) / 1000;
     }
     return acc;
   }, 0) || 0;
