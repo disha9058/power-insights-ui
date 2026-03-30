@@ -57,21 +57,59 @@ const Appliances = () => {
 
     setIsSaving(true);
     try {
-      // First, delete existing selections
+      // Delete previously expanded instances (children with parent_id)
+      await supabase
+        .from("appliances")
+        .delete()
+        .not("parent_id", "is", null);
+
+      // Save selections
       await supabase.from("user_appliance_selections").delete().neq("id", "00000000-0000-0000-0000-000000000000");
 
-      // Prepare selections for insert
       const selections = Object.entries(applianceQuantities).map(([applianceId, quantity]) => ({
         appliance_id: applianceId,
         quantity,
       }));
 
-      // Insert new selections
       const { error: insertError } = await supabase
         .from("user_appliance_selections")
         .insert(selections);
 
       if (insertError) throw insertError;
+
+      // Expand appliances into individual instances
+      const instances: {
+        name: string;
+        icon: string | null;
+        power_rating: number;
+        gpio_pin: number | null;
+        parent_id: string;
+        instance_number: number;
+      }[] = [];
+
+      for (const [applianceId, quantity] of Object.entries(applianceQuantities)) {
+        const appliance = appliances?.find((a) => a.id === applianceId);
+        if (!appliance) continue;
+
+        for (let i = 1; i <= quantity; i++) {
+          instances.push({
+            name: quantity === 1 ? appliance.name : `${appliance.name} ${i}`,
+            icon: appliance.icon,
+            power_rating: appliance.power_rating,
+            gpio_pin: appliance.gpio_pin,
+            parent_id: applianceId,
+            instance_number: i,
+          });
+        }
+      }
+
+      if (instances.length > 0) {
+        const { error: expandError } = await supabase
+          .from("appliances")
+          .insert(instances);
+
+        if (expandError) throw expandError;
+      }
 
       // Update total count in budget_settings
       const { data: budgetData } = await supabase

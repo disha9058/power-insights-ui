@@ -14,6 +14,7 @@ import { useBudgetData } from "@/hooks/useBudgetData";
 import { useTotalMonthlyStats, useTotalDailyStats } from "@/hooks/useUsageData";
 import {
   useAppliances,
+  useApplianceInstances,
   useApplianceStates,
   useToggleAppliance
 } from "@/hooks/useAppliances";
@@ -33,8 +34,12 @@ const Dashboard = () => {
   const { totals: monthlyTotals, isLoading: monthlyLoading } = useTotalMonthlyStats();
   const { totals: dailyTotals } = useTotalDailyStats();
   const { data: appliances, isLoading: appliancesLoading } = useAppliances();
+  const { data: instances, isLoading: instancesLoading } = useApplianceInstances();
   const { data: applianceStates } = useApplianceStates();
   const toggleAppliance = useToggleAppliance();
+
+  // Use instances for control if available, fallback to templates
+  const controlAppliances = instances && instances.length > 0 ? instances : appliances;
 
   const now = new Date();
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
@@ -59,10 +64,10 @@ const Dashboard = () => {
   const isOverBudget = estimatedEndOfMonth > monthlyBudget;
 
   // 🔌 Calculate live power from appliances
-  const currentPower = appliances?.reduce((acc, appliance) => {
+  const currentPower = controlAppliances?.reduce((acc, appliance) => {
     const state = applianceStates?.[appliance.id];
     if (state?.state === "on") {
-      return acc + Number(appliance.power_rating) / 1000; // W → kW
+      return acc + Number(appliance.power_rating) / 1000;
     }
     return acc;
   }, 0) || 0;
@@ -76,7 +81,7 @@ const Dashboard = () => {
     toggleAppliance.mutate({ applianceId, state: newState });
   };
 
-  if (budgetLoading || monthlyLoading || appliancesLoading) {
+  if (budgetLoading || monthlyLoading || appliancesLoading || instancesLoading) {
     return (
       <div className="page-container flex items-center justify-center">
         <Loader2 className="w-10 h-10 animate-spin text-primary" />
@@ -246,7 +251,7 @@ const Dashboard = () => {
           <h3 className="section-title">Appliance Control</h3>
 
           <div className="space-y-3 mt-3">
-            {appliances?.slice(0, 4).map((appliance) => {
+            {controlAppliances?.map((appliance) => {
               const currentState =
                 applianceStates?.[appliance.id]?.state || "off";
 
