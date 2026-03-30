@@ -47,6 +47,46 @@ export const useAppliances = () => {
   return query;
 };
 
+export const useApplianceInstances = () => {
+  const queryClient = useQueryClient();
+
+  const query = useQuery({
+    queryKey: ["appliance-instances"],
+    queryFn: async (): Promise<Appliance[]> => {
+      const { data, error } = await supabase
+        .from("appliances")
+        .select("*")
+        .not("parent_id", "is", null)
+        .order("name");
+      
+      if (error) throw error;
+      return data || [];
+    },
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("appliance-instances-changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "appliances" },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["appliance-instances"] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
+  return query;
+};
+
 export const useApplianceStates = () => {
   const queryClient = useQueryClient();
 
