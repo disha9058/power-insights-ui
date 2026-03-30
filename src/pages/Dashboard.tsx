@@ -81,7 +81,7 @@ const Dashboard = () => {
     toggleAppliance.mutate({ applianceId, state: newState });
   };
 
-  if (budgetLoading || monthlyLoading || appliancesLoading) {
+  if (budgetLoading || monthlyLoading || appliancesLoading || instancesLoading) {
     return (
       <div className="page-container flex items-center justify-center">
         <Loader2 className="w-10 h-10 animate-spin text-primary" />
