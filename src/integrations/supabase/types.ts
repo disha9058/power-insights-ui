@@ -49,7 +49,9 @@ export type Database = {
           gpio_pin: number | null
           icon: string | null
           id: string
+          instance_number: number | null
           name: string
+          parent_id: string | null
           power_rating: number
           updated_at: string
         }
@@ -58,7 +60,9 @@ export type Database = {
           gpio_pin?: number | null
           icon?: string | null
           id?: string
+          instance_number?: number | null
           name: string
+          parent_id?: string | null
           power_rating?: number
           updated_at?: string
         }
@@ -67,11 +71,21 @@ export type Database = {
           gpio_pin?: number | null
           icon?: string | null
           id?: string
+          instance_number?: number | null
           name?: string
+          parent_id?: string | null
           power_rating?: number
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "appliances_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "appliances"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       budget_settings: {
         Row: {
