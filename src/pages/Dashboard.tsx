@@ -34,8 +34,12 @@ const Dashboard = () => {
   const { totals: monthlyTotals, isLoading: monthlyLoading } = useTotalMonthlyStats();
   const { totals: dailyTotals } = useTotalDailyStats();
   const { data: appliances, isLoading: appliancesLoading } = useAppliances();
+  const { data: instances, isLoading: instancesLoading } = useApplianceInstances();
   const { data: applianceStates } = useApplianceStates();
   const toggleAppliance = useToggleAppliance();
+
+  // Use instances for control if available, fallback to templates
+  const controlAppliances = instances && instances.length > 0 ? instances : appliances;
 
   const now = new Date();
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
