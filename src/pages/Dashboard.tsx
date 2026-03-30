@@ -14,6 +14,7 @@ import { useBudgetData } from "@/hooks/useBudgetData";
 import { useTotalMonthlyStats, useTotalDailyStats } from "@/hooks/useUsageData";
 import {
   useAppliances,
+  useApplianceInstances,
   useApplianceStates,
   useToggleAppliance
 } from "@/hooks/useAppliances";
