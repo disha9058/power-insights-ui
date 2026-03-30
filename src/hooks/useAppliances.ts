@@ -15,6 +15,7 @@ export const useAppliances = () => {
       const { data, error } = await supabase
         .from("appliances")
         .select("*")
+        .is("parent_id", null)
         .order("name");
       
       if (error) throw error;
