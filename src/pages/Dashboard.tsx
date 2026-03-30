@@ -251,7 +251,7 @@ const Dashboard = () => {
           <h3 className="section-title">Appliance Control</h3>
 
           <div className="space-y-3 mt-3">
-            {appliances?.slice(0, 4).map((appliance) => {
+            {controlAppliances?.map((appliance) => {
               const currentState =
                 applianceStates?.[appliance.id]?.state || "off";
 
