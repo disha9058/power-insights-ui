@@ -32,76 +32,7 @@ const BillUpload = () => {
         </p>
       </div>
 
-      <div className="px-6 flex-1">
-        {!uploaded ? (
-          /* Upload Area */
-          <button
-            onClick={handleUpload}
-            className="w-full aspect-[4/3] border-2 border-dashed border-primary/30 rounded-2xl flex flex-col items-center justify-center bg-primary/5 hover:bg-primary/10 transition-colors"
-          >
-            <div className="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center mb-4">
-              <Upload className="w-8 h-8 text-primary" />
-            </div>
-            <p className="font-semibold text-foreground mb-1">
-              Tap to upload bill
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Image or PDF format
-            </p>
-          </button>
-        ) : (
-          /* Extracted Details */
-          <div className="space-y-4">
-            <div className="flex items-center gap-3 p-4 bg-success/10 rounded-xl border border-success/20">
-              <CheckCircle className="w-5 h-5 text-success" />
-              <span className="font-medium text-foreground">Bill uploaded successfully</span>
-            </div>
-
-            <div className="stat-card">
-              <div className="flex items-center gap-2 mb-4">
-                <FileText className="w-5 h-5 text-primary" />
-                <h3 className="font-semibold text-foreground">Extracted Details</h3>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex justify-between items-center py-3 border-b border-border">
-                  <span className="text-muted-foreground">Billing Period</span>
-                  <span className="font-semibold">{billData.billingPeriod}</span>
-                </div>
-                
-                <div className="flex justify-between items-center py-3 border-b border-border">
-                  <div className="flex items-center gap-2">
-                    <IndianRupee className="w-4 h-4 text-primary" />
-                    <span className="text-muted-foreground">Total Bill Amount</span>
-                  </div>
-                  <span className="text-2xl font-bold text-primary">
-                    ₹{billData.billAmount.toLocaleString()}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center py-3 border-b border-border">
-                  <div className="flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-accent" />
-                    <span className="text-muted-foreground">Units Consumed</span>
-                  </div>
-                  <span className="font-semibold">{billData.unitsConsumed} kWh</span>
-                </div>
-
-                <div className="flex justify-between items-center py-3">
-                  <span className="text-muted-foreground">Daily Average</span>
-                  <span className="font-semibold">{billData.averageDaily} kWh/day</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-info/10 rounded-xl p-4 border border-info/20">
-              <p className="text-sm text-foreground">
-                Based on your bill, your average daily cost was <span className="font-bold">₹{Math.round(billData.billAmount / 30)}</span>
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
+      <div className="px-6 flex-1" />
 
       {/* Buttons */}
       <div className="px-6 pb-8 pt-4 space-y-3">
