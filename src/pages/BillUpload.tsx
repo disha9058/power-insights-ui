@@ -37,19 +37,11 @@ const BillUpload = () => {
       {/* Buttons */}
       <div className="px-6 pb-8 pt-4 space-y-3">
         <button
-          onClick={handleContinue}
+          onClick={handleSkip}
           className="btn-primary"
         >
-          Continue
+          Skip for now
         </button>
-        {!uploaded && (
-          <button
-            onClick={handleSkip}
-            className="w-full py-3 text-muted-foreground font-medium"
-          >
-            Skip for now
-          </button>
-        )}
       </div>
     </div>
   );
