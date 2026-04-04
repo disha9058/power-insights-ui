@@ -155,6 +155,30 @@ export type Database = {
           },
         ]
       }
+      sensor_readings: {
+        Row: {
+          created_at: string
+          current_amps: number
+          id: string
+          power_watts: number | null
+          voltage: number
+        }
+        Insert: {
+          created_at?: string
+          current_amps: number
+          id?: string
+          power_watts?: number | null
+          voltage?: number
+        }
+        Update: {
+          created_at?: string
+          current_amps?: number
+          id?: string
+          power_watts?: number | null
+          voltage?: number
+        }
+        Relationships: []
+      }
       user_appliance_selections: {
         Row: {
           appliance_id: string
