@@ -105,9 +105,6 @@ const Dashboard = () => {
 
       <div className="px-5 space-y-5">
 
-        {/* Live Sensor Data - Top Priority */}
-        <LiveSensorCard />
-
         {/* Main Budget Card */}
         <div className="gradient-primary rounded-2xl p-6 text-primary-foreground shadow-lg">
           <p className="text-sm opacity-80">Amount Spent This Month</p>
@@ -185,6 +182,8 @@ const Dashboard = () => {
           )}
         </div>
 
+        {/* Live Sensor Data */}
+        <LiveSensorCard />
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-4">
