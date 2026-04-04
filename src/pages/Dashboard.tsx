@@ -21,6 +21,7 @@ import {
 
 import ApplianceControlCard from "@/components/ApplianceControlCard";
 import DailyUsageList from "@/components/DailyUsageList";
+import LiveSensorCard from "@/components/LiveSensorCard";
 
 import {
   calculateEnergy,
