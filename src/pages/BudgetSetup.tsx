@@ -8,7 +8,7 @@ const BudgetSetup = () => {
 
   const handleContinue = () => {
     if (budget) {
-      navigate("/bill-upload");
+      navigate("/appliances");
     }
   };
 
