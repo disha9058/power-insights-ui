@@ -147,7 +147,7 @@ const Appliances = () => {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <div className="px-6 pt-12 pb-6">
-        <p className="text-sm text-muted-foreground mb-1">Step 3 of 3</p>
+        <p className="text-sm text-muted-foreground mb-1">Step 2 of 2</p>
         <h1 className="text-2xl font-bold text-foreground mb-2">
           Your Appliances
         </h1>
