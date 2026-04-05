@@ -21,7 +21,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Navigate to="/budget-setup" replace />} />
           <Route path="/budget-setup" element={<BudgetSetup />} />
-          <Route path="/bill-upload" element={<BillUpload />} />
+          
           <Route path="/appliances" element={<Appliances />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/alerts" element={<Alerts />} />
