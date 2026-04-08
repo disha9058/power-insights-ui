@@ -21,7 +21,7 @@ import {
 
 import ApplianceControlCard from "@/components/ApplianceControlCard";
 import DailyUsageList from "@/components/DailyUsageList";
-import LiveSensorCard from "@/components/LiveSensorCard";
+
 
 import {
   calculateEnergy,
@@ -182,8 +182,6 @@ const Dashboard = () => {
           )}
         </div>
 
-        {/* Live Sensor Data */}
-        <LiveSensorCard />
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-4">
