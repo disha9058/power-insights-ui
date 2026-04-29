@@ -124,10 +124,11 @@ const BudgetSetup = () => {
       <div className="px-6 pb-8 pt-4">
         <button
           onClick={handleContinue}
-          disabled={!budget}
-          className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={!budget || saving}
+          className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-          Continue
+          {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+          {saving ? "Saving..." : "Continue"}
         </button>
         <p className="text-center text-xs text-muted-foreground mt-3">
           You can change this anytime in settings
