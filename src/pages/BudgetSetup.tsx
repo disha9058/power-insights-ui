@@ -3,51 +3,33 @@ import { useNavigate } from "react-router-dom";
 import { IndianRupee, Wallet, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 const BudgetSetup = () => {
   const [budget, setBudget] = useState("");
   const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const handleContinue = async () => {
     if (!budget) return;
     setSaving(true);
     try {
       const monthly = Number(budget);
-      const daily = Math.round((monthly / 30) * 100) / 100;
 
-      // Reset spending counters by clearing the data they're computed from.
-      // get_daily/monthly_usage_summary derive cost from appliance_states history
-      // and daily_usage_summary rows — wipe both so today/month spent = ₹0.
-      await supabase.from("appliance_states").delete().not("id", "is", null);
-      await supabase.from("daily_usage_summary").delete().not("id", "is", null);
+      // Atomic reset on the server: clears spending history,
+      // saves new budget, and seeds all appliances OFF.
+      const { error } = await supabase.rpc("reset_budget_data", {
+        p_monthly_budget: monthly,
+      });
+      if (error) throw error;
 
-      // Upsert budget settings (single-row table)
-      const { data: existing } = await supabase
-        .from("budget_settings")
-        .select("id")
-        .limit(1)
-        .maybeSingle();
-
-      if (existing?.id) {
-        await supabase
-          .from("budget_settings")
-          .update({ monthly_budget: monthly, daily_budget: daily })
-          .eq("id", existing.id);
-      } else {
-        await supabase
-          .from("budget_settings")
-          .insert({ monthly_budget: monthly, daily_budget: daily });
-      }
-
-      // Set all appliances to OFF baseline so live power starts at 0
-      const { data: appliances } = await supabase.from("appliances").select("id");
-      if (appliances && appliances.length > 0) {
-        await supabase.from("appliance_states").insert(
-          appliances.map((a) => ({ appliance_id: a.id, state: "off" }))
-        );
-      }
+      // Invalidate cached dashboard data so it refetches fresh state
+      await queryClient.invalidateQueries({ queryKey: ["budget-status"] });
+      await queryClient.invalidateQueries({ queryKey: ["daily-usage"] });
+      await queryClient.invalidateQueries({ queryKey: ["monthly-usage"] });
+      await queryClient.invalidateQueries({ queryKey: ["appliance-states"] });
 
       navigate("/appliances");
     } catch (e) {
