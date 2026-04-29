@@ -1,14 +1,64 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { IndianRupee, Wallet } from "lucide-react";
+import { IndianRupee, Wallet, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const BudgetSetup = () => {
   const [budget, setBudget] = useState("");
+  const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleContinue = () => {
-    if (budget) {
+  const handleContinue = async () => {
+    if (!budget) return;
+    setSaving(true);
+    try {
+      const monthly = Number(budget);
+      const daily = Math.round((monthly / 30) * 100) / 100;
+
+      // Reset spending counters by clearing the data they're computed from.
+      // get_daily/monthly_usage_summary derive cost from appliance_states history
+      // and daily_usage_summary rows — wipe both so today/month spent = ₹0.
+      await supabase.from("appliance_states").delete().not("id", "is", null);
+      await supabase.from("daily_usage_summary").delete().not("id", "is", null);
+
+      // Upsert budget settings (single-row table)
+      const { data: existing } = await supabase
+        .from("budget_settings")
+        .select("id")
+        .limit(1)
+        .maybeSingle();
+
+      if (existing?.id) {
+        await supabase
+          .from("budget_settings")
+          .update({ monthly_budget: monthly, daily_budget: daily })
+          .eq("id", existing.id);
+      } else {
+        await supabase
+          .from("budget_settings")
+          .insert({ monthly_budget: monthly, daily_budget: daily });
+      }
+
+      // Set all appliances to OFF baseline so live power starts at 0
+      const { data: appliances } = await supabase.from("appliances").select("id");
+      if (appliances && appliances.length > 0) {
+        await supabase.from("appliance_states").insert(
+          appliances.map((a) => ({ appliance_id: a.id, state: "off" }))
+        );
+      }
+
       navigate("/appliances");
+    } catch (e) {
+      console.error(e);
+      toast({
+        title: "Could not save budget",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -74,10 +124,11 @@ const BudgetSetup = () => {
       <div className="px-6 pb-8 pt-4">
         <button
           onClick={handleContinue}
-          disabled={!budget}
-          className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={!budget || saving}
+          className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-          Continue
+          {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+          {saving ? "Saving..." : "Continue"}
         </button>
         <p className="text-center text-xs text-muted-foreground mt-3">
           You can change this anytime in settings
