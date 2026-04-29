@@ -262,6 +262,10 @@ export type Database = {
           total_on_time_minutes: number
         }[]
       }
+      reset_budget_data: {
+        Args: { p_monthly_budget: number }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
